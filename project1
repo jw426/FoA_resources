@@ -1,0 +1,424 @@
+/* Program to assist in the challenge of solving sudoku puzzles.
+ Skeleton program written by Alistair Moffat, ammoffat@unimelb.edu.au,
+ August 2021, with the intention that it be modified by students
+ to add functionality, as required by the assignment specification.
+ Student Authorship Declaration:
+ (1) I certify that except for the code provided in the initial skeleton
+ file, the program contained in this submission is completely my own
+ individual work, except where explicitly noted by further comments that
+ provide details otherwise. I understand that work that has been developed
+ by another student, or by me in collaboration with other students, or by
+ non-students as a result of request, solicitation, or payment, may not be
+ submitted for assessment in this subject. I understand that submitting for
+ assessment work developed by or in collaboration with other students or
+ non-students constitutes Academic Misconduct, and may be penalized by mark
+ deductions, or by other penalties determined via the University of
+ Melbourne Academic Honesty Policy, as described at
+ https://academicintegrity.unimelb.edu.au.
+ (2) I also certify that I have not provided a copy of this work in either
+ softcopy or hardcopy or any other form to any other student, and nor will I
+ do so until after the marks are released. I understand that providing my
+ work to other students, regardless of my intention or any undertakings made
+ to me by that other student, is also Academic Misconduct.
+ (3) I further understand that providing a copy of the assignment
+ specification to any form of code authoring or assignment tutoring service,
+ or drawing the attention of others to such services and code that may have
+ been made available via such a service, may be regarded as Student General
+ Misconduct (interfering with the teaching activities of the University
+ and/or inciting others to commit Academic Misconduct). I understand that
+ an allegation of Student General Misconduct may arise regardless of whether
+ or not I personally make use of such solutions or sought benefit from such
+ actions.
+ Signed by: JiWon Bae #1229059
+ Dated: 2021/09/10
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+/* these #defines provided as part of the initial skeleton */
+#define NDIM 3 /* sudoku dimension, size of each inner square */
+#define NDIG (NDIM * NDIM)
+/* total number of values in each row */
+#define NGRP 3 /* number of sets each cell is a member of */
+#define NSET (NGRP * NDIG)
+/* total number of sets in the sudoku */
+#define NCLL (NDIG * NDIG)
+/* total number of cells in the sudoku */
+#define ERROR (-1) /* error return value from some functions */
+/* these global constant arrays provided as part of the initial skeleton,
+ you may use them in your code but must not alter them in any way,
+ regard them as being completely fixed. They describe the relationships
+ between the cells in the sudoku and provide a basis for all of the
+ sudoku processing loops */
+/* there are 27 different different sets of elements that need to be
+ checked against each other, this array converts set numbers to cells,
+ that's why its called s2c */
+int s2c[NSET][NDIM * NDIM] = {
+    /* the first group of nine sets describe the sudoku's rows */
+    {0, 1, 2, 3, 4, 5, 6, 7, 8},
+    {9, 10, 11, 12, 13, 14, 15, 16, 17},
+    {18, 19, 20, 21, 22, 23, 24, 25, 26},
+    {27, 28, 29, 30, 31, 32, 33, 34, 35},
+    {36, 37, 38, 39, 40, 41, 42, 43, 44},
+    {45, 46, 47, 48, 49, 50, 51, 52, 53},
+    {54, 55, 56, 57, 58, 59, 60, 61, 62},
+    {63, 64, 65, 66, 67, 68, 69, 70, 71},
+    {72, 73, 74, 75, 76, 77, 78, 79, 80},
+    /* the second group of nine sets describes the sudoku's columns */
+    {0, 9, 18, 27, 36, 45, 54, 63, 72},
+    {1, 10, 19, 28, 37, 46, 55, 64, 73},
+    {2, 11, 20, 29, 38, 47, 56, 65, 74},
+    {3, 12, 21, 30, 39, 48, 57, 66, 75},
+    {4, 13, 22, 31, 40, 49, 58, 67, 76},
+    {5, 14, 23, 32, 41, 50, 59, 68, 77},
+    {6, 15, 24, 33, 42, 51, 60, 69, 78},
+    {7, 16, 25, 34, 43, 52, 61, 70, 79},
+    {8, 17, 26, 35, 44, 53, 62, 71, 80},
+    /* the last group of nine sets describes the inner squares */
+    {0, 1, 2, 9, 10, 11, 18, 19, 20},
+    {3, 4, 5, 12, 13, 14, 21, 22, 23},
+    {6, 7, 8, 15, 16, 17, 24, 25, 26},
+    {27, 28, 29, 36, 37, 38, 45, 46, 47},
+    {30, 31, 32, 39, 40, 41, 48, 49, 50},
+    {33, 34, 35, 42, 43, 44, 51, 52, 53},
+    {54, 55, 56, 63, 64, 65, 72, 73, 74},
+    {57, 58, 59, 66, 67, 68, 75, 76, 77},
+    {60, 61, 62, 69, 70, 71, 78, 79, 80},
+};
+/* there are 81 cells in a dimension-3 sudoku, and each cell is a
+ member of three sets, this array gets filled by the function
+ fill_c2s(), based on the defined contents of the array s2c[][] */
+int c2s[NCLL][NGRP];
+void fill_c2s()
+{
+    int s = 0, d = 0, c;
+    for (; s < NSET; s++)
+    {
+        /* record the first set number each cell is part of */
+        for (c = 0; c < NDIM * NDIM; c++)
+        {
+            c2s[s2c[s][c]][d] = s;
+        }
+        if ((s + 1) % (NGRP * NDIM) == 0)
+        {
+            d++;
+        }
+    }
+#if 0
+/* this code available here if you want to see the array
+ cs2[][] that gets created, just change that 0 two lines back
+ to a 1 and recompile */
+for (c=0; c<NCLL; c++) {
+printf("cell %2d: sets ", c);
+for (s=0; s<NGRP; s++) {
+printf("%3d", c2s[c][s]);
+}
+printf("\n");
+}
+printf("\n");
+#endif
+    return;
+}
+/* find the row number a cell is in, counting from 1
+ */
+int rownum(int c)
+{
+    return 1 + (c / (NDIM * NDIM));
+}
+/* find the column number a cell is in, counting from 1
+ */
+int colnum(int c)
+{
+    return 1 + (c % (NDIM * NDIM));
+}
+/* find the minor square number a cell is in, counting from 1
+ */
+int sqrnum(int c)
+{
+    return 1 + 3 * (c / NSET) + (c / NDIM) % NDIM;
+}
+/* If you wish to add further #defines, put them below this comment,
+ then prototypes for the functions that you add
+ The only thing you should alter above this line is to complete the
+ Authorship Declaration
+*/
+/****************************************************************/
+#define NEWLINE NDIG
+#define NEWBLOCK (NEWLINE * NDIM)
+#define SQUARE NDIM
+#define PER_GRP (NSET / NGRP)
+#define ROW 0
+#define COL 1
+#define SQR 2
+#define TRUE 1
+#define FALSE 0
+void fill_array(int c_array[]);
+void print_sudoku(int c_array[], int tadaa);
+int unknown_count(int c_array[]);
+int grid_error(int c_array[]);
+void count_occur_set(int count_dig[], int c_array[], int nset);
+void rcs_grpno(int nset);
+int strategy_one(int c_array[]);
+void copy_int_array(int *copy_into, int *copy_from);
+void pos_dig_arr(int npos[]);
+void elimination(int c_array[], int npos[], int ncell, int grp);
+void print_change_to(int cnum, int change_to);
+/****************************************************************/
+/* main program controls all the action
+ */
+int main(int argc, char *argv[])
+{
+    int c_array[NCLL];
+    fill_c2s();
+    /* stage 1 */
+    fill_array(c_array);
+    print_sudoku(c_array, FALSE);
+    /* stage 2 */
+    if (grid_error(c_array) == ERROR)
+    {
+        exit(EXIT_FAILURE);
+    }
+    /* stage 3: only S1 */
+    while (strategy_one(c_array) && unknown_count(c_array))
+    {
+        ;
+    }
+    print_sudoku(c_array, TRUE);
+    return 0;
+}
+/* fill the array with all the numbers in the cells of sudoku
+ */
+void fill_array(int c_array[])
+{
+
+    int num;
+    for (int i = 0; i < NCLL; i++)
+    {
+        scanf("%d", &num);
+        c_array[i] = num;
+    }
+}
+/* print out the input sudoku in the right format
+before implementing strategy 1, tadaa should have value 0 (FALSE)
+and after, tadaa should have value 1 (TRUE)
+*/
+void print_sudoku(int c_array[], int tadaa)
+{
+    int ncell, unknown;
+    for (ncell = 0; ncell < NCLL; ncell++)
+    {
+        /* formatting structure */
+        if (!(ncell % NEWLINE))
+        {
+            printf("\n");
+        }
+        else if (!(ncell % SQUARE))
+        {
+            printf(" | ");
+        }
+        else
+        {
+            printf(" ");
+        }
+        if (ncell && !(ncell % NEWBLOCK))
+        {
+            printf("------+-------+------\n");
+        }
+        /* replace empty cell values with '.' */
+        int c_val = c_array[ncell];
+        if (c_val)
+        {
+            printf("%d", c_val);
+        }
+        else
+        {
+            printf(".");
+        }
+    }
+    unknown = unknown_count(c_array);
+    printf("\n\n%2d cells are unknown\n", unknown);
+    if (!unknown && tadaa)
+    {
+        printf("\nta daa!!!\n");
+    }
+}
+/* count the number of unfilled cells in the sudoku
+and return the number of unfilled cells. 0 for completion.
+*/
+int unknown_count(int c_array[])
+{
+    int unfilled = FALSE;
+    for (int i = 0; i < NCLL; i++)
+    {
+        if (!c_array[i])
+        {
+            unfilled++;
+        }
+    }
+    return unfilled;
+}
+/* go through all the sets of the sudoku
+and if there is more than one occurrance of a digit n,
+print what set, group the error has occurred in.
+*/
+int grid_error(int c_array[])
+{
+    int nset, curset_viol, tot_viol = 0, set_viol = 0;
+    /* go through all sets */
+    for (nset = 0; nset < NSET; nset++)
+    {
+        curset_viol = FALSE;
+        int count_dig[NDIG] = {0};
+        count_occur_set(count_dig, c_array, nset);
+        /* if more than 1 occurrance of a digit n in a set */
+        for (int i = 0; i < NDIG; i++)
+        {
+            if (count_dig[i] > 1)
+            {
+                tot_viol++;
+                curset_viol = TRUE;
+                printf("\nset %2d (", nset);
+                rcs_grpno(nset);
+                printf("): %d instances of %d", count_dig[i], i + 1);
+            }
+        }
+        set_viol += curset_viol;
+    }
+    if (tot_viol)
+    {
+        printf("\n\n%d different sets have violations\n", set_viol);
+        printf("%d violations in total\n", tot_viol);
+        return ERROR;
+    }
+    return FALSE;
+}
+/* count the occurrance of each number in a certain set
+n occurrances of i: count_dig[i-1]=n
+*/
+void count_occur_set(int count_dig[], int c_array[], int nset)
+{
+    int c_val;
+    for (int i = 0; i < NDIG; i++)
+    {
+        c_val = c_array[s2c[nset][i]];
+        if (c_val)
+        {
+            count_dig[c_val - 1]++;
+        }
+    }
+}
+/* take in the set number as input
+print "grp_type grp_no" (grp_typ: row/col/sqr, grp_no: eg. row 1)
+*/
+void rcs_grpno(int nset)
+{
+    if (nset / PER_GRP == ROW)
+    {
+        printf("row ");
+    }
+    else if (nset / PER_GRP == COL)
+    {
+        printf("col ");
+    }
+    else
+    {
+        printf("sqr ");
+    }
+    printf("%d", nset % PER_GRP + 1);
+}
+/* goes through all the empty cells (value 0 in array)
+and by the process of eliminating already occurred digits
+in the sets that the cell is in, finds the only possible value
+and replaces the empty cell with that value.
+*/
+int strategy_one(int c_array[])
+{
+    int temp_array[NCLL], npos[NDIG], change = FALSE, pos_count, pos_val;
+
+    copy_int_array(temp_array, c_array);
+    for (int i = 0; i < NCLL; i++)
+    {
+        if (c_array[i])
+        {
+            continue;
+        }
+        pos_count = 0;
+        pos_dig_arr(npos);
+        elimination(c_array, npos, i, NGRP - 1);
+        /* counts the number of digits possible */
+        for (int j = 0; j < NDIG; j++)
+        {
+            if (npos[j])
+            {
+                pos_count++;
+                pos_val = npos[j];
+            }
+        }
+        if (pos_count == 1)
+        {
+            if (!change)
+            {
+                printf("\nstrategy one\n");
+            }
+            change = TRUE;
+            temp_array[i] = pos_val;
+            print_change_to(i, pos_val);
+        }
+    }
+    copy_int_array(c_array, temp_array);
+    return change;
+}
+/* take an int array and copy into another array
+ */
+void copy_int_array(int *copy_into, int *copy_from)
+{
+    for (int i = 0; i < NCLL; i++)
+    {
+        *(copy_into + i) = *(copy_from + i);
+    }
+}
+/* fills an int array with all possible digits that a cell can have
+eg. standard 9 digit sudoku: npos[9]={1,2,3,4,5,6,7,8,9} */
+void pos_dig_arr(int npos[])
+{
+    for (int i = 0; i < NDIG; i++)
+    {
+        npos[i] = i + 1;
+    }
+}
+/* goes through all the sets that a cell 'c' is a part of
+and goes through all the cells in those sets to eliminate
+the possibilities of digits that 'c' cannot be.
+*/
+void elimination(int c_array[], int npos[], int ncell, int grp)
+{
+    int cells, cval, set;
+    if (grp >= ROW && grp <= SQR)
+    {
+        set = c2s[ncell][grp];
+
+        for (cells = 0; cells < NDIG; cells++)
+        {
+            cval = c_array[s2c[set][cells]];
+            if (cval)
+            {
+                npos[cval - 1] = 0;
+            }
+        }
+        elimination(c_array, npos, ncell, grp - 1);
+    }
+}
+/* gets cell number and the value it is supposed to be changed to
+prints out in the format (v=value):
+'row n col m must be v'
+*/
+void print_change_to(int cnum, int change_to)
+{
+    rcs_grpno(c2s[cnum][ROW]);
+    printf(" ");
+    rcs_grpno(c2s[cnum][COL]);
+    printf(" must be %d\n", change_to);
+}
+/* algorithms are fun */
+/****************************************************************/
