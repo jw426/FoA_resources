@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "treeops.h"
+#include "listops.h"
 
 /* --------------------------------------- */
 int str_cmp(void* v1, void* v2);
@@ -12,8 +14,17 @@ void ex10_15();
 void tree_sort(void *arr[], size_t n);
 /* --------------------------------------- */
 
+
 int
 main(int argc, char** argv) {
+
+    tree_t* tree = make_empty_tree(str_cmp);
+    char* arr[] = {"Hello", "world", "this", "is a", "sample string"};
+    for (int i = 0; i < 5; i++) {
+        insert_in_order(tree, arr[i]);
+    }
+
+    printf("have input %d strings\n", tree_size(tree));
 
     return 0;
 }
@@ -22,7 +33,7 @@ main(int argc, char** argv) {
 /* --------------------------------------- */
 // int func(void *, void *)
 int str_cmp(void* v1, void* v2) {
-    
+    return strcmp((char*)v1, (char*)v2);
 }
 
 /* --------------------------------------- */
@@ -35,9 +46,10 @@ int tree_size(tree_t *tree) {
 
 // private recursion function 
 int rec_tree_size(tnode_t* node) {
-
+    // base case
+    // recursive case 
+    // (in, pre, post)
 }
-
 /* --------------------------------------- */
 /* ex 10.15 tree sort */
 void print_array(char* arr[], int n) {
