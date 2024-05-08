@@ -43,8 +43,10 @@ int tree_size(tree_t *tree) {
 // private recursion function 
 int rec_tree_size(tnode_t* node) {
     // base case
+    if (node == NULL) return 0;
     // recursive case 
     // (in, pre, post)
+    return 1 + rec_tree_size(node->left) + rec_tree_size(node->rght);
 }
 /* --------------------------------------- */
 /* ex 10.15 tree sort */
@@ -72,5 +74,10 @@ void tree_sort(void *arr[], size_t n) {
 
 void in_order_traversal(void* arr[], int* i, tnode_t* node) {
 
+    // base case
+
+    // recurse over left
+    // visit current node
+    // recurse over rght 
 
 }
