@@ -7,31 +7,22 @@ int str_cmp(void* v1, void* v2);
 int tree_size(tree_t *tree);
 int rec_tree_size(tnode_t* node);
 /* --------------------------------------- */
+void print_array(char* arr[], int n);
+void ex10_15();
+void tree_sort(void *arr[], size_t n);
+/* --------------------------------------- */
 
 int
 main(int argc, char** argv) {
 
-    tree_t* tree = make_empty_tree(str_cmp);
-    int i = 0; 
-    char str[100000];
-    // str: [a, n, d, \0, _, _, _, _, ..., _]
-    // newstr: [a, n, d, \0]
-    while (i < 12 && scanf("%s", str)) {
-        char* newstr = malloc(sizeof(char)*(strlen(str)+1));
-        strcpy(newstr, str);
-        insert_in_order(tree, newstr);
-        i++;
-    }
-
-    printf("%d read in\n", tree_size(tree));
-
     return 0;
 }
+
 
 /* --------------------------------------- */
 // int func(void *, void *)
 int str_cmp(void* v1, void* v2) {
-    return strcmp((char*)v1, (char*)v2);
+    
 }
 
 /* --------------------------------------- */
@@ -45,9 +36,30 @@ int tree_size(tree_t *tree) {
 // private recursion function 
 int rec_tree_size(tnode_t* node) {
 
-    if (node == NULL) {
-        return 0;
-    }
+}
 
-    return 1 + rec_tree_size(node->left) + rec_tree_size(node->rght);
+/* --------------------------------------- */
+/* ex 10.15 tree sort */
+void print_array(char* arr[], int n) {
+    printf("[");
+    for (int i = 0; i < n ; i++) {
+        printf("%s, ", arr[i]);
+    }
+    printf("]");
+}
+
+void ex10_15() {
+    char* arr[] = {"hello", "world", "this", "is", "in-order", "traversal"};
+    tree_sort(arr, 6);
+}
+
+void tree_sort(void *arr[], size_t n) {
+    // make empty tree
+    // insert_in_order(tree, arr[i])
+
+}
+
+void in_order_traversal(void* arr[], int* i, tnode_t* node) {
+
+
 }
