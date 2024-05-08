@@ -55,8 +55,10 @@ recursive_insert(tnode_t *root, tnode_t *new, int cmp(void *, void *)) {
     if (root == NULL) {
         return new;
     } else if (cmp(new->data, root->data) < 0) {
+        // NULL, az
         root->left = recursive_insert(root->left, new, cmp);
     } else {
+        // bana az vs bana < 0
         root->rght = recursive_insert(root->rght, new, cmp);
     }
     return root;
