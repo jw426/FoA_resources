@@ -10,7 +10,6 @@ int tree_size(tree_t *tree);
 int rec_tree_size(tnode_t* node);
 /* --------------------------------------- */
 void print_array(char* arr[], int n);
-void ex10_15();
 void tree_sort(void *arr[], size_t n);
 /* --------------------------------------- */
 
@@ -18,13 +17,10 @@ void tree_sort(void *arr[], size_t n);
 int
 main(int argc, char** argv) {
 
-    tree_t* tree = make_empty_tree(str_cmp);
     char* arr[] = {"Hello", "world", "this", "is a", "sample string"};
-    for (int i = 0; i < 5; i++) {
-        insert_in_order(tree, arr[i]);
-    }
-
-    printf("have input %d strings\n", tree_size(tree));
+    
+    tree_sort(arr, 5);
+    print_array(arr, 5);
 
     return 0;
 }
@@ -60,14 +56,17 @@ void print_array(char* arr[], int n) {
     printf("]");
 }
 
-void ex10_15() {
-    char* arr[] = {"hello", "world", "this", "is", "in-order", "traversal"};
-    tree_sort(arr, 6);
-}
 
 void tree_sort(void *arr[], size_t n) {
     // make empty tree
+    tree_t* tree = make_empty_tree(str_cmp);
     // insert_in_order(tree, arr[i])
+    for (int i = 0; i < 5; i++) {
+        insert_in_order(tree, arr[i]);
+    }
+
+    int i = 0; 
+    in_order_traversal(arr, &i, tree->root);
 
 }
 
