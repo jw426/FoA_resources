@@ -1,5 +1,4 @@
-CC = clang
-CFLAGS = -Wall -Wextra -Werror -Wno-newline-eof -Wno-unused-parameter -pedantic -std=c11 -ferror-limit=1
+CC = gcc
 LDFLAGS = -lm
 
 PROGRAM = program

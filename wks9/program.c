@@ -3,6 +3,10 @@
 #include <string.h>
 
 /* --------------------------------------- */
+int str_cmp(void* v1, void* v2);
+int tree_size(tree_t *tree);
+int rec_tree_size(tnode_t* node);
+/* --------------------------------------- */
 
 int
 main(int argc, char** argv) {
@@ -41,4 +45,9 @@ int tree_size(tree_t *tree) {
 // private recursion function 
 int rec_tree_size(tnode_t* node) {
 
+    if (node == NULL) {
+        return 0;
+    }
+
+    return 1 + rec_tree_size(node->left) + rec_tree_size(node->rght);
 }
